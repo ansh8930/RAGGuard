@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ragguard-eval"
+version = "0.1.0"
+description = "Transparent lexical baselines for RAG evaluation"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{name = "RAGGuard contributors"}]
+dependencies = []
+
+[project.optional-dependencies]
+api = ["fastapi>=0.110", "uvicorn>=0.27"]
+dev = ["pytest>=8", "httpx>=0.27", "fastapi>=0.110"]
+
+[project.scripts]
+ragguard = "ragguard.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["ragguard*"]

@@ -1,0 +1,6 @@
+[
+  "tests/test_metrics.py::test_evaluate",
+  "tests/test_metrics.py::test_f1",
+  "tests/test_metrics.py::test_groundedness",
+  "tests/test_metrics.py::test_retrieval"
+]
