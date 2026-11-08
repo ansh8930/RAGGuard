@@ -1,2 +1,7 @@
-# Created by pytest automatically.
-*
+__pycache__/
+.pytest_cache/
+*.pyc
+*.egg-info/
+.venv/
+dist/
+.env
