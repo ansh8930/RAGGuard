@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ragguard-eval"
-version = "0.1.0"
-description = "Transparent lexical baselines for RAG evaluation"
+version = "0.2.0"
+description = "Transparent RAG evaluation with optional LLM faithfulness judge"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

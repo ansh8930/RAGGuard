@@ -1,52 +1,67 @@
 # RAGGuard
 
-A small, dependency-free Python library for **transparent lexical baseline metrics** in retrieval-augmented generation (RAG) pipelines. Includes an optional FastAPI endpoint, CLI, tests, and GitHub Actions.
+Experimental open-source RAG evaluation toolkit with transparent lexical baselines and an **optional** external LLM judge.
 
-> **Important:** The `groundedness_proxy` score measures token overlap with retrieved text. It does **not** detect hallucinations reliably or verify factual correctness. `question_overlap_f1` is not a semantic answer relevance metric. These baselines should be supplemented with human evaluation or stronger evaluators before making quality claims.
+**Important:** Token overlap is not factual verification. The LLM judge is probabilistic and may be wrong. RAGGuard is not a security or safety guarantee.
 
-## Quick start
+## Install
+
+Python 3.10+:
 
 ```bash
-python -m pip install -e '.[api,dev]'
+python -m pip install -e ".[dev]"
 python -m pytest -q
-ragguard examples/sample.json
-uvicorn ragguard.api:app --reload
-```
-
-POST to `http://127.0.0.1:8000/evaluate`:
-
-```json
-{"question":"What is the capital of France?","answer":"Paris","contexts":["Paris is the capital of France."],"reference":"Paris"}
 ```
 
 ## Python usage
 
 ```python
-from ragguard import evaluate, precision_at_k, recall_at_k
-print(evaluate('Capital of France?', 'Paris', ['Paris is in France'], 'Paris'))
-print(precision_at_k(['doc1','doc2'], ['doc1'], 2))
-print(recall_at_k(['doc1','doc2'], ['doc1','doc3'], 2))
+from ragguard import evaluate, precision_at_k
+print(evaluate('Capital of France?', 'Paris', ['Paris is the capital of France.']))
+print(precision_at_k(['doc1', 'doc2'], ['doc1'], 2))
 ```
 
-## Metrics
+## CLI
 
-- `groundedness_proxy`: fraction of distinct answer tokens also appearing in contexts; lexical overlap only.
-- `question_overlap_f1`: bag-of-words token F1 against the question; not semantic relevance.
-- `reference_token_f1`: token F1 against a provided reference answer.
-- `precision_at_k`: number of unique relevant IDs among first k results divided by k.
-- `recall_at_k`: number of unique relevant IDs among first k results divided by number of unique relevant IDs.
+```bash
+ragguard examples/sample.json
+ragguard examples/sample.jsonl --batch --output results.jsonl
+```
 
-## Roadmap
+## FastAPI
 
-- Dataset-level aggregate evaluation and JSONL input
-- More robust evidence attribution
-- Optional semantic scoring with documented model limitations
-- CI quality threshold checks
+```bash
+python -m pip install -e ".[api]"
+uvicorn ragguard.api:app --reload
+```
 
-## Contributing
+Open `http://127.0.0.1:8000/docs` for interactive API documentation.
+`POST /evaluate` accepts one record; `POST /evaluate/batch` accepts up to 100 records.
 
-Open an issue describing a bug or feature. Submit a focused PR with tests. Please don't claim this repository has community adoption until it does.
+## Optional external LLM faithfulness judge
 
-## License
+Requires a paid or separately provisioned API key and an OpenAI-compatible HTTPS chat completions endpoint. This feature sends your answer and retrieved context to that provider; don't send confidential data.
 
-MIT. See LICENSE.
+PowerShell:
+
+```powershell
+$env:RAGGUARD_API_KEY = 'YOUR_API_KEY'
+ragguard examples/sample.json --judge-model YOUR_MODEL_NAME
+Remove-Item Env:RAGGUARD_API_KEY
+```
+
+The returned `supported` boolean and unsupported claims are **model judgments, not verified facts**. Costs and availability depend on your provider. The optional judge is disabled unless `--judge-model` is supplied.
+
+## Limitations
+
+- `groundedness_proxy` measures overlap of unique answer tokens with context tokens, not truth.
+- `question_overlap_f1` measures lexical overlap with the question, not semantic answer relevance.
+- Precision@K uses `k` as denominator even when fewer than `k` items are returned.
+- Batch JSONL validation fails on malformed records rather than silently skipping them.
+- This is a pre-release; evaluate results manually before relying on them.
+
+## Contribute
+
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SECURITY.md](SECURITY.md), and [CHANGELOG.md](CHANGELOG.md).
+
+MIT licensed. Project authorship and maintainer claims should reflect actual contributions.
